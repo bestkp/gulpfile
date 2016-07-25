@@ -18,7 +18,18 @@ var sass 			= require('gulp-ruby-sass'),			// CSS预处理/Sass编译
   less        = require('gulp-less'),
   mincss      = require('gulp-minify-css'),
   LessAutoprefix = require('less-plugin-autoprefix'),
-  autoprefix = new LessAutoprefix({ browsers: ['last 4 versions'] });
+  autoprefix = new LessAutoprefix(
+    {
+      browsers: [
+        'last 3 versions',
+      //'Explorer >= 8',
+      //'Chrome >= 21',
+      //'Firefox >= 1',
+      //'Edge 13',
+      'Android >= 4',
+      'iOS >= 6'
+      ]
+    });
 /* = 全局设置
  -------------------------------------------------------------- */
 var srcPath = {
