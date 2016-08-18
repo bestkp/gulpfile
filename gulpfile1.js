@@ -7,7 +7,6 @@ var gulp			= require('gulp');					// 基础库
 var sass 			= require('gulp-ruby-sass'),			// CSS预处理/Sass编译
   uglify 			= require('gulp-uglify'),				// JS文件压缩
   imagemin 		= require('gulp-imagemin'),		// imagemin 图片压缩
-  jpegtran    = require('imagemin-jpegtran'),
   pngquant 		= require('imagemin-pngquant'),	// imagemin 深度压缩
   livereload 	= require('gulp-livereload'),			// 网页自动刷新（服务器控制客户端同步刷新）
   webserver 	= require('gulp-webserver'),		// 本地服务器
@@ -89,37 +88,16 @@ gulp.task('libs', function() {
   return gulp.src(srcPath.script +'/lib/*')
     .pipe(gulp.dest(destPath.script + '/lib'))
 });
-//压缩jpg
-gulp.task('jpgmin',function(){
-  return gulp.src(srcPath.image+'/**/*.jpg')
-    .pipe(imagemin({
-      progressive: true,
-      use:[jpegtran()]
-    }))
-    .pipe(gulp.dest(destPath.image));
-});
-//压缩png
-// 任务：压缩png
-gulp.task('pngmin',function(){
-  return gulp.src(srcPath.image+'/**/*.png')
-    .pipe(imagemin({
-      quality: '65-80',
-      speed: 4,
-      use:[pngquant()]
-    }))
-    .pipe(gulp.dest(destPath.image));
-});
 // imagemin 图片压缩
 gulp.task('images', function(){
-  // return gulp.src( srcPath.image+'/**/*' ) // 指明源文件路径，如需匹配指定格式的文件，可以写成 .{png,jpg,gif,svg}
-  //   .pipe(changed( destPath.image ))
-  //   .pipe(imagemin({
-  //     progressive: true, // 无损压缩JPG图片
-  //     svgoPlugins: [{removeViewBox: false}], // 不要移除svg的viewbox属性
-  //     use: [pngquant()] // 深度压缩PNG
-  //   }))
-  //   .pipe(gulp.dest( destPath.image )); // 输出路径
-  return gulp.start('jpgmin', 'pngmin');
+  return gulp.src( srcPath.image+'/**/*' ) // 指明源文件路径，如需匹配指定格式的文件，可以写成 .{png,jpg,gif,svg}
+    .pipe(changed( destPath.image ))
+    .pipe(imagemin({
+      progressive: true, // 无损压缩JPG图片
+      svgoPlugins: [{removeViewBox: false}], // 不要移除svg的viewbox属性
+      use: [pngquant()] // 深度压缩PNG
+    }))
+    .pipe(gulp.dest( destPath.image )); // 输出路径
 });
 // 文件合并
 gulp.task('concat', function () {
@@ -132,8 +110,6 @@ gulp.task('concat', function () {
 gulp.task('webserver', function() {
   gulp.src( destPath.html ) // 服务器目录（.代表根目录）
     .pipe(webserver({ // 运行gulp-webserver
-      host: '192.168.4.151',
-      port: '8000',
       livereload: true, // 启用LiveReload
       open: true // 服务器启动时自动打开网页
     }));
@@ -161,14 +137,13 @@ gulp.task('clean', function() {
 });
 // 样式处理
 gulp.task('lessRelease', function () {
-  return gulp.src(srcPath.less+ '/**/*.less')
-    .pipe(sourcemaps.init())
-    .pipe(less({
-      plugins: [autoprefix]
-    }))
-    .pipe(mincss())
-    .pipe(sourcemaps.write('maps'))
-    .pipe(gulp.dest(destPath.css));
+    return gulp.src(srcPath.less)
+      .pipe(less({
+        plugins: [autoprefix]
+      }))
+      .pipe(mincss())
+      .pipe(sourcemaps.write('maps'))
+      .pipe(gulp.dest(destPath.css))
 });
 gulp.task('sassRelease', function () {
   return sass( srcPath.css, { style: 'compressed' }) // 指明源文件路径、并进行文件匹配（编译风格：压缩）
@@ -186,7 +161,7 @@ gulp.task('scriptRelease', function() {
 });
 // 打包发布
 gulp.task('release', ['clean'], function(){ // 开始任务前会先执行[clean]任务
-  return gulp.start('lessRelease','scriptRelease', 'images'); // 等[clean]任务执行完毕后再执行其他任务
+  return gulp.start('lessRelease','scriptRelease','images'); // 等[clean]任务执行完毕后再执行其他任务
 });
 
 /* = 帮助提示( Help )
