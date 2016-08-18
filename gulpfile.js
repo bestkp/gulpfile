@@ -9,6 +9,7 @@ var sass 			= require('gulp-ruby-sass'),			// CSS预处理/Sass编译
   imagemin 		= require('gulp-imagemin'),		// imagemin 图片压缩
   jpegtran    = require('imagemin-jpegtran'),
   pngquant 		= require('imagemin-pngquant'),	// imagemin 深度压缩
+  imageminGifsicle = require('imagemin-gifsicle');
   livereload 	= require('gulp-livereload'),			// 网页自动刷新（服务器控制客户端同步刷新）
   webserver 	= require('gulp-webserver'),		// 本地服务器
   rename 		  = require('gulp-rename'),			// 文件重命名
@@ -94,7 +95,18 @@ gulp.task('jpgmin',function(){
   return gulp.src(srcPath.image+'/**/*.jpg')
     .pipe(imagemin({
       progressive: true,
+      optimizationLevel: 5, //类型：Number 默认：3 取值范围：0-7（优化等级）
       use:[jpegtran()]
+    }))
+    .pipe(gulp.dest(destPath.image));
+});
+//压缩gif
+gulp.task('gifmin',function(){
+  return gulp.src(srcPath.image+'/**/*.gif')
+    .pipe(imagemin({
+      optimizationLevel: 5, //类型：Number 默认：3 取值范围：0-7（优化等级）
+      interlaced: true, //类型：Boolean 默认：false 隔行扫描gif进行渲染
+      use:[imageminGifsicle()]
     }))
     .pipe(gulp.dest(destPath.image));
 });
@@ -103,7 +115,7 @@ gulp.task('jpgmin',function(){
 gulp.task('pngmin',function(){
   return gulp.src(srcPath.image+'/**/*.png')
     .pipe(imagemin({
-      quality: '65-80',
+      quality: '60-70',
       speed: 4,
       use:[pngquant()]
     }))
@@ -111,15 +123,15 @@ gulp.task('pngmin',function(){
 });
 // imagemin 图片压缩
 gulp.task('images', function(){
-  // return gulp.src( srcPath.image+'/**/*' ) // 指明源文件路径，如需匹配指定格式的文件，可以写成 .{png,jpg,gif,svg}
-  //   .pipe(changed( destPath.image ))
+  // return gulp.src(srcPath.image+'/**/*.png') // 指明源文件路径，如需匹配指定格式的文件，可以写成 .{png,jpg,gif,svg}
+  //   .pipe(changed(destPath.image))
   //   .pipe(imagemin({
-  //     progressive: true, // 无损压缩JPG图片
-  //     svgoPlugins: [{removeViewBox: false}], // 不要移除svg的viewbox属性
-  //     use: [pngquant()] // 深度压缩PNG
+  //     progressive: true,
+  //     svgoPlugins: [{removeViewBox: false}],//不要移除svg的viewbox属性
+  //     use: [pngquant()] //使用pngquant深度压缩png图片的imagemin插件
   //   }))
   //   .pipe(gulp.dest( destPath.image )); // 输出路径
-  return gulp.start('jpgmin', 'pngmin');
+  return gulp.start('jpgmin', 'pngmin', 'gifmin');
 });
 // 文件合并
 gulp.task('concat', function () {
